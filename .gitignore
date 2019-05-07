@@ -1,0 +1,3 @@
+# Ignore docksal local config
+.docksal/docksal-local.env
+
