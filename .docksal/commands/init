@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+## Installs attsite profile
+##
+## Usage: fin attsite-init
+
+# Abort if anything fails
+set -e
+
+#-------------------------- Settings --------------------------------
+
+# PROJECT_ROOT is passed from fin.
+# The following variables are configured in the '.env' file: DOCROOT, SITE_DIRECTORY, SOURCE_ALIAS and others.
+
+DOCROOT_PATH="${PROJECT_ROOT}/${DOCROOT}"
+#SITEDIR_PATH="${DOCROOT_PATH}/sites/${SITE_DIRECTORY}"
+SITEDIR_PATH="${DOCROOT_PATH}/sites/default"
+
+#-------------------------- END: Settings --------------------------------
+
+
+#-------------------------- Helper functions --------------------------------
+
+# Console colors
+red='\033[0;31m'
+green='\033[0;32m'
+green_bg='\033[42m'
+yellow='\033[1;33m'
+NC='\033[0m'
+
+echo-red () { echo -e "${red}$1${NC}"; }
+echo-green () { echo -e "${green}$1${NC}"; }
+echo-green-bg () { echo -e "${green_bg}$1${NC}"; }
+echo-yellow () { echo -e "${yellow}$1${NC}"; }
+
+# Copy a settings file.
+# Skips if the destination file already exists.
+# @param $1 source file
+# @param $2 destination file
+copy_settings_file()
+{
+	local source="$1"
+	local dest="$2"
+	
+	if [[ ! -f $dest ]]; then
+		echo "Copying ${dest}..."
+		cp $source $dest
+	else
+		echo-yellow "${dest} already in place."
+	fi
+}
+
+#-------------------------- Execution --------------------------------
+# Initialize settings files
+
+# Site installing.
+echo -e "${green_bg} Step 2 ${NC}${green} Installing Drupal8.7 Profile...${NC}"
+fin drush si standard --locale="en" --site-name="Drupal Site" --site-mail="admin@locahost.com" --account-name="admin" --account-mail="admin@locahost.com"  --account-pass="att123" -y
+
+# Those modules are only for development purposes.
+# So they were added as "require-dev" dependency for Composer.
+# And they can't be enabled as project real dependency for install profile.
+# So that's why we are going to turn them on separately and only for local environment.
+# fin drupal module:install entity_type_clone attsite_dev
